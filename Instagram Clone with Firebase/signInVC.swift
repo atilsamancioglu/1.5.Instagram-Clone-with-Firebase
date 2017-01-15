@@ -7,8 +7,15 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseAuth
 
 class signInVC: UIViewController {
+    
+    @IBOutlet weak var emailText: UITextField!
+    
+    @IBOutlet weak var passwordText: UITextField!
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -16,20 +23,55 @@ class signInVC: UIViewController {
         // Do any additional setup after loading the view.
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+
+    @IBAction func signInButtonClicked(_ sender: Any) {
+        
+        if emailText.text != "" && passwordText.text != "" {
+        
+        FIRAuth.auth()?.signIn(withEmail: emailText.text!, password: passwordText.text!, completion: { (user, error) in
+            if error != nil {
+                let alert = UIAlertController(title: "Error", message: error?.localizedDescription, preferredStyle: UIAlertControllerStyle.alert)
+                let ok = UIAlertAction(title: "OK", style: UIAlertActionStyle.cancel, handler: nil)
+                alert.addAction(ok)
+                self.present(alert, animated: true, completion: nil)
+            } else {
+                
+                UserDefaults.standard.set(user!.email, forKey: "userinfo")
+                UserDefaults.standard.synchronize()
+                
+                let delegate : AppDelegate = UIApplication.shared.delegate as! AppDelegate
+                delegate.rememberLogin()
+        
+            }
+        })
+        
+        
+        
+        
+        }
     }
     
+    
+    @IBAction func signUpButtonClicked(_ sender: Any) {
+        
+        if emailText.text != "" && passwordText.text != "" {
+          
+            FIRAuth.auth()?.createUser(withEmail: emailText.text!, password: passwordText.text! , completion: { (user, error) in
+                
+                if error != nil {
+                    let alert = UIAlertController(title: "Error", message: error?.localizedDescription, preferredStyle: UIAlertControllerStyle.alert)
+                    let ok = UIAlertAction(title: "OK", style: UIAlertActionStyle.cancel, handler: nil)
+                    alert.addAction(ok)
+                    self.present(alert, animated: true, completion: nil)
+                } else {
+                    print(user?.email)
+                    print(user?.uid)
+                }
+                
+            })
+            
+        }
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
     }
-    */
 
 }
